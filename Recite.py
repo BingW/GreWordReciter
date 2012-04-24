@@ -269,7 +269,7 @@ def getch():
         termios.tcsetattr(fd, termios.TCSADRAIN, old)
 
 ####################  main  ######################
-BOOK_PATH = "/Users/bingwang/VimWork/GRE/"
+BOOK_PATH = "/Users/bingwang/VimWork/GreWordReciter/"
 remember_threshold = 0.6
 unit_length = 20
 review_unit_length = 40
