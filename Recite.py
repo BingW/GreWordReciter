@@ -102,7 +102,7 @@ def save():
     year = str(date.today().year)
     filetime = year + "_" + month + "_" + day
     encode = json.dumps(GRE_book)
-    f = open(BOOK_PATH+"GRE_book_"+filetime,"w")
+    f = open(BOOK_PATH+"History/GRE_book_"+filetime,"w")
     f.write(encode)
     f.close()
     f = open(BOOK_PATH+"GRE_book","w")
