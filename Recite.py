@@ -90,7 +90,7 @@ def show_stastus():
     print "you sepend:\t\t",study_time/3600,"h",(study_time%3600)/60,"min"
     print "words reviewed:\t\t",word_reviewed,"words"
     print "review speed:\t\t",word_reviewed*1./((review_time+1)*1./3600),"words/h"
-    print "review percentage\t\t",word_reviewed*1.0/len(reviewed)
+    print "review percentage\t\t",word_reviewed*1.0/(len(reviewed)+1)
     print "words newed:\t\t",word_newed,"words"
     print "new word speed:\t\t",word_newed*1.0/((new_time+1)*1./3600),"words/h"
     print "total percent:\t\t",round(word_total*100.0/len(GRE_book),2),"%"
@@ -246,6 +246,13 @@ def preview(preview_list):
         time.sleep(1)
         print GRE_book[word]["meaning"]
         time.sleep(1)
+    print "#################"
+    print "# Again ? (y/n) #"
+    print "#################"
+    if getch().upper() == "Y":
+        return True
+    else:
+        return False
 
 def check_redundance():
     for word in GRE_book:
@@ -336,8 +343,12 @@ while cmd != "Q":
                         print "#############################"
                         print "#         New Word          #"
                         print "#############################"
-                        preview(temp_list)
+
+                        while preview(temp_list):
+                            pass
+                            GRE_book["_preview_time"] += len(temp_list) * 6
                         GRE_book["_preview_time"] += len(temp_list) * 6
+
                         print "#############################"
                         print "#           Ready           #"
                         print "#############################"
