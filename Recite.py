@@ -126,6 +126,7 @@ def recite(word,up = None):
     if cmd.upper() == "N":
         print GRE_book[word]["meaning"]
         print "........................press any to continue"
+        print "\nhttp://en.wiktionary.org/wiki/"+word+"#Etymology\n"
         if getch():
             word_time_used = int(time.time()-word_start)
             word_handle(word,False,word_time_used)
@@ -140,6 +141,7 @@ def recite(word,up = None):
             return True
         else:
             print "........................press any to continue"
+            print "\nhttp://en.wiktionary.org/wiki/"+word+"#Etymology\n"
             if getch():
                 word_time_used = int(time.time()-word_start)
                 word_handle(word,False,word_time_used)
