@@ -280,11 +280,45 @@ def getch():
 ####################  main  ######################
 BOOK_PATH = "/Users/bingwang/VimWork/GreWordReciter/"
 remember_threshold = 0.6
-unit_length = 20
-review_unit_length = 40
+unit_length = 30
+review_unit_length = 30
 f = open(BOOK_PATH+"GRE_book")
 encode = f.read()
 GRE_book = json.loads(encode)
+
+'''
+GRE_book["_total_time"] = 0
+GRE_book["_total_review_time"] = 0
+GRE_book["_total_new_time"] = 0
+for word in GRE_book:
+    if word[0] != "_":
+        GRE_book[word]["time_used"] = 0
+for first_letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+    GRE_book["_"+first_letter] = []
+f = open(BOOK_PATH+"GRE.txt")
+for i,line in enumerate(f):
+    line = line.strip()
+    word = line[:line.find("[")-1]
+    first_letter = word[0].upper()
+    GRE_book["_"+first_letter].append(word)
+letter_rank = "ZYXQJKUVWNOLFGITHMBDERCPSA"
+for i in xrange(256):
+    GRE_book["_g_"+str(i)] = []
+flag = 0
+group_num = 0
+for first_letter in letter_rank:
+    for word in GRE_book["_"+first_letter]:
+        if flag < 33:
+            GRE_book["_g_"+str(group_num)].append(word)
+            flag += 1
+        else:
+            flag = 0
+            group_num += 1
+encode = json.dumps(GRE_book)
+f = open(BOOK_PATH+"GRE_book","w")
+f.write(encode)
+f.close()
+'''
 
 print GRE_book["_total_time"]/3600,"h",(GRE_book["_total_time"]%3600)/60,"min"
 print len([word for word in GRE_book if word[0] != "_" and GRE_book[word]["recite_count"]>0])
@@ -296,78 +330,79 @@ GRE_book["_preview_time"] = 0
 GRE_book["_new_time"] = 0
 newed = []
 reviewed = []
-cmd = ""
-while cmd != "Q":
-    calculte_remember_rate()
-    review_list = [word for word in GRE_book if word[0] != "_" \
-                    and GRE_book[word]["recite_count"] > 0 \
-                    and (GRE_book[word]["remember_rate"] < remember_threshold \
-                     or GRE_book[word]["strength"]%1 != 0)]
+cmd = getch()
+if cmd == 1:
+    #TODO
+    pass
+else:
+    while cmd != "Q":
+        calculte_remember_rate()
+        review_list = [word for word in GRE_book if word[0] != "_" \
+                        and GRE_book[word]["recite_count"] > 0 \
+                        and (GRE_book[word]["remember_rate"] < remember_threshold \
+                         or GRE_book[word]["strength"]%1 != 0)]
 
-    for word in review_list:
-        if word not in reviewed:
-            reviewed.append(word)
-    
-    if len(review_list) > 0:
-        print "#############################"
-        print "#         Reviewing         #"
-        print "#############################"
-        print "You have\t",len(review_list),"words to review."
-        time.sleep(1)
+        for word in review_list:
+            if word not in reviewed:
+                reviewed.append(word)
+        
+        if len(review_list) > 0:
+            print "#############################"
+            print "#         Reviewing         #"
+            print "#############################"
+            print "You have\t",len(review_list),"words to review."
+            time.sleep(1)
 
-        c = len(review_list) / review_unit_length
-        if c == 0:
-            cmd = review(review_list)
-        else:
-            for i in range(c):
-                cmd = review(review_list[i*review_unit_length:(i+1)*review_unit_length])
+            c = len(review_list) / review_unit_length
+            if c == 0:
+                cmd = review(review_list)
+            else:
+                for i in range(c):
+                    cmd = review(review_list[i*review_unit_length:(i+1)*review_unit_length])
+                    if cmd == "Q":
+                        break
                 if cmd == "Q":
                     break
-            if cmd == "Q":
-                break
-            cmd = review(review_list[(i+1)*review_unit_length:])
+                cmd = review(review_list[(i+1)*review_unit_length:])
 
-    if cmd == "Q":
-        break
+        if cmd == "Q":
+            break
 
-    temp_list = []
-    stop_flag = False
-    for word in GRE_book:
-        if word[0] != "_" and GRE_book[word]["recite_count"] == 0:
-            temp_list.append(word)
-            newed.append(word)
-            for group in GRE_book[word]["group_words"]:
-                if GRE_book[group]["recite_count"] == 0 and group not in newed:
-                    temp_list.append(group)
-                    newed.append(group)
-                    if len(temp_list) > unit_length:
-                        stop_flag = True
-                        print "#############################"
-                        print "#         New Word          #"
-                        print "#############################"
-
-                        while preview(temp_list):
-                            pass
+        temp_list = []
+        stop_flag = False
+        for word in GRE_book:
+            if word[0] != "_" and GRE_book[word]["recite_count"] == 0:
+                temp_list.append(word)
+                newed.append(word)
+                for group in GRE_book[word]["group_words"]:
+                    if GRE_book[group]["recite_count"] == 0 and group not in newed:
+                        temp_list.append(group)
+                        newed.append(group)
+                        if len(temp_list) > unit_length:
+                            stop_flag = True
+                            print "#############################"
+                            print "#         New Word          #"
+                            print "#############################"
+                            while preview(temp_list):
+                                pass
+                                GRE_book["_preview_time"] += len(temp_list) * 6
                             GRE_book["_preview_time"] += len(temp_list) * 6
-                        GRE_book["_preview_time"] += len(temp_list) * 6
-
-                        print "#############################"
-                        print "#           Ready           #"
-                        print "#############################"
-                        time.sleep(1)
-                        print "#############################"
-                        print "#           Go!!            #"
-                        print "#############################"
-                        cmd = review(temp_list)
-                        if cmd == "Q":
+                            print "#############################"
+                            print "#           Ready           #"
+                            print "#############################"
+                            time.sleep(1)
+                            print "#############################"
+                            print "#           Go!!            #"
+                            print "#############################"
+                            cmd = review(temp_list)
+                            if cmd == "Q":
+                                break
                             break
-                        break
-            if stop_flag:
-                break
+                if stop_flag:
+                    break
 
 GRE_book["_total_time"] += GRE_book["_this_time"] + GRE_book["_preview_time"]
 GRE_book["_total_review_time"] += GRE_book["_review_time"]
 GRE_book["_total_new_time"] += GRE_book["_new_time"]
 if save():
     print "saved"
-
